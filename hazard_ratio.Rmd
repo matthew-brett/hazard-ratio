@@ -1,0 +1,341 @@
+---
+jupyter:
+  jupytext:
+    notebook_metadata_filter: all,-language_info
+    split_at_heading: true
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.16.6
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+# Survival, risk and hazard
+
+This page discusses the relationship between survival curves, Relative Risk
+(RR) and the Hazard Ratio (HR).
+
+Let's start with a couple of idealized survival curves.
+
+As usual, we'll show the working with some simple code as we go along, but you
+should be able to follow the page even if you don't follow the code.
+
+```{python}
+# Get the libraries we will use for this page.
+import numpy as np  # Working with arrays.
+import matplotlib.pyplot as plt  # Plotting
+```
+
+Our example survival curves will be for two treatments, A and B, over a period
+of 10 years.
+
+We start by making an array to store the times at which we have measured
+survival, in our idealized example.
+
+```{python}
+dt = 0.001  # The gap between measurements.
+# Times at which we imagine our measurements to have taken place (in years).
+t = np.arange(0, stop=10, step=dt)
+# Show the first 10 times.
+t[:10]
+```
+
+Next we make a survival curve for treatment A.   The survival curve gives the proportion of people still alive at any particular time $t$.
+
+```{python}
+# Values for a simple curve of survival after treatment A.
+# The maths of the equation is not much relevant here - it's just a way to
+# generate a typical-looking survival curve.
+survival_A = np.e ** -(t / 3)
+```
+
+We plot survival for A:
+
+```{python}
+plt.plot(t, survival_A, label='A')
+plt.xlabel('Time (years)')
+plt.ylabel('Proportion still alive')
+plt.title('Survival curve for treatment A')
+plt.legend();
+```
+
+Now let's make another idealized curve for treatment B, and plot it together with A.
+
+```{python}
+# Values for a simple curve of survival after treatment B.
+survival_B = np.e ** -(t / 1.25)
+```
+
+```{python}
+plt.plot(t, survival_A, label='A')
+plt.plot(t, survival_B, linestyle=':', label='B')
+plt.xlabel('Time (years)')
+plt.ylabel('Proportion still alive')
+plt.title('Survival curves for treatments A and B')
+plt.legend();
+```
+
+## Relative risk
+
+Relative risk (RR) is, as the name implies, one risk divided by another risk.
+A typical RR is the relative risk of *death*.   For example, at any particular
+time $t$ we can calculate the risk (proportion) of deaths with treatment
+A — call this $p$ — and the risk of death for treatment B — call this $r$.  The
+RR for that time is $r / p$.
+
+For example, consider the survival values for A and B at 5 years.
+
+```{python}
+# Number of times (and survival values)
+N = len(t)
+N
+```
+
+```{python}
+# Value for 5 years is at the center of the array of values.
+pos_5y = round(N / 2)
+pos_5y
+```
+
+```{python}
+print('Time (years) at mid-position', t[pos_5y])
+```
+
+```{python}
+survival_A_5 = survival_A[pos_5y]  # Value for A at 5 years.
+print('A survival at 5 years', survival_A_5)
+```
+
+```{python}
+survival_B_5 = survival_B[pos_5y]  # Value for B at 5 years.
+print('B survival at 5 years', survival_B_5)
+```
+
+The risk of death is the survival proportion (above) subtracted from 1:
+
+```{python}
+risk_A_5 = 1 - survival_A_5
+risk_B_5 = 1 - survival_B_5
+```
+
+The RR of death with A relative to B is:
+
+```{python}
+rr_5 = risk_A_5 / risk_B_5
+print('Relative risk at 5 years', rr_5)
+```
+This tells us that those in treatment A have 0.82 (82%) of the risk of death suffered in B.  Put another way, A has an 18% relative reduction in death compared to B, at 5 years.
+
+
+We can plot RR over time, by first calculating the *death* curves (which are just the survival curves subtracted from 1):
+
+```{python}
+death_A = 1 - survival_A
+death_B = 1 - survival_B
+```
+
+```{python}
+plt.plot(t, death_A, label='Death for A')
+plt.plot(t, death_B, linestyle=':', label='Death for B')
+plt.xlabel('Time (years)')
+plt.ylabel('Proportion who have died')
+plt.title('Death curves for treatments A and B')
+plt.legend();
+```
+
+The death curves are the survival curves vertically flipped.
+
+
+The RRs are the death values for A divided by those for B:
+
+```{python}
+# We'll get a warning about dividing by 0 because deaths were 0
+# at the beginning.
+rr_A_rel_B = death_A / death_B
+```
+
+```{python}
+plt.plot(t, rr_A_rel_B, label='RR for A relative to B')
+plt.xlabel('Time (years)')
+plt.ylabel('RR')
+plt.title('RR for treatment A relative to B')
+plt.legend();
+```
+
+Notice that the RR changes over time.  In particular, early on, the death
+curves are diverging quickly, and absolute values are small, so the RR is far
+from 0. As the curves start to converge, over time, the RR approaches 1.  An RR
+of 1 means that the relative risk of death is similar between A and B.
+
+
+## On the hazard ratio
+
+
+The Hazard Ratio (HR) is another way to compare survival (or, equivalently,
+death) between two conditions.
+
+The HR is the ratio of two *hazard rates*.  In our case, we will be comparing the hazard rates for treatments A and B.
+
+The hazard rate for death, is the rate of death at some particular time,
+divided by the proportion still alive at that time.
+
+The rate of death at a particular time is the slope of the death function.
+
+Because we've used a mathematical function to generate the survival (and
+therefore death) curve, we could calculate that slope using calculus, and in
+particular, by taking the *derivative* of the death curve, but let's reduce the
+mathematics by doing this slope calculation *numerically*.  We take slope at
+any particular time to be the difference between the current death value and
+the next, divided by the difference in time
+([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis value divided
+by change in x-axis value, or *rise over run*).
+
+Here is the death *rate* for A at 5 years;
+
+```{python}
+death_rate_A_5 = (death_A[pos_5y + 1] - death_A[pos_5y]) / dt
+print('Death rate for A at 5 years', death_rate_A_5)
+```
+
+We can do also do this calculation with the `np.diff` function, that
+calculates, for each element, the difference between the element and the
+previous element in the array.
+
+```{python}
+# Rate calculation for all values.
+death_rate_A = np.diff(death_A) / dt
+# Show that we get the same value for 5 years as we did above.
+print('Death rate for A at 5 years', death_rate_A[pos_5y])
+```
+
+```{python}
+# Death rate calculation for every time point of B.
+death_rate_B = np.diff(death_B) / dt
+# Show the first 10 values
+death_rate_B[:10]
+```
+
+```{python}
+# For plotting, we have take into account that we have one less
+# value in the rates than we do in the initial values, because we
+# have taken the differences.
+rate_t = t[:-1]  # Drop the last value for time.
+plt.plot(rate_t, death_rate_A, label='Rate of death for A')
+plt.plot(rate_t, death_rate_B, linestyle=':', label='Rate of death for B')
+plt.xlabel('Time (years)')
+plt.ylabel('Death rate (change in death per unit time)')
+plt.title('Death rate curves for treatments A and B')
+plt.legend();
+```
+
+Notice that A has a higher death rate than B in middle years, but this is
+because there are more people at risk of death in A, because more people have
+survived.  We therefore adjust the death rate (above) by dividing by the
+survival values, to give the death *hazard rate*.   This is the death rate,
+accounting for the proportion still at risk from death.  Therefore, for any
+particular time, this gives the risk of death for those still alive.
+
+```{python}
+# For the reasons above - we drop the last survival value.
+hazard_rate_A = death_rate_A / survival_A[:-1]
+hazard_rate_B = death_rate_B / survival_B[:-1]
+```
+
+```{python}
+plt.plot(rate_t, hazard_rate_A, label='Hazard rate, death for A')
+plt.plot(rate_t, hazard_rate_B, linestyle=':',
+         label='Hazard rate, death for B')
+plt.xlabel('Time (years)')
+plt.ylabel('Hazard rate (hazard for death per unit time)')
+plt.title('Hazard rate curves for treatments A and B')
+plt.legend();
+```
+
+
+Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of the fact we used simple exponential functions to create the initial survival curves.  In general, and with more complicated survival curves, the hazard ratio can vary over time.
+
+
+The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for A divided by the hazard rate for B:
+
+```{python}
+hazard_ratios = hazard_rate_A / hazard_rate_B
+# Round these to the 8 decimal places to avoid calculation error,
+# and a noisy but uniformative plot.
+rounded_hrs = np.round(hazard_ratios, 8)
+plt.plot(rate_t, rounded_hrs, label='Hazard ratios, death for A')
+plt.xlabel('Time (years)')
+plt.ylabel('Hazard ratios')
+plt.title('Hazard ratio values for treatments A and B')
+plt.legend();
+hazard_ratios
+```
+
+Because the hazard rates (in this case) were constant, then the hazard ratios are constant, and therefore, we only need one hazard ratio value to summarize the whole time-course:
+
+```{python}
+# We take the mean, but we could have taken the first, or last ...
+HR = np.mean(hazard_ratios)
+print('HR for A relative to B', HR)
+```
+
+At this point we should say that it is an assumption of typical hazard ratio calculations that the *hazard rates* are proportional across time, meaning that the *hazard ratio* remains the same over time.  This is an assumption in most HR calculations from models - see [Proportional Hazards Model](https://en.wikipedia.org/wiki/Proportional_hazards_model).
+
+
+Notice too that the HR is approximately the same as the RR very near the start of our time-course, but - in this case - much further from zero than the RR at the end of the time-course.
+
+In fact, if the assumption of the proportional hazard rate holds, we can use the single value HR to calculate the survival curve of A from the survival curve of B.
+
+This is because it is possible to show that the survival of A is given by:
+
+```{python}
+estimated_survival_A = survival_B ** HR
+# This gives an accurate estimate of survival_A to 4 decimal places.
+np.allclose(estimated_survival_A, survival_A, atol=1e-4)
+```
+
+The HR is a *ratio*; it is the hazard rate for A divided by that for B.  Therefore the HR for B relative to A is given by `1 / HR` and:
+
+```{python}
+estimated_survival_B = survival_A ** (1 / HR)
+# This gives an accurate estimate of survival_B to 4 decimal places.
+np.allclose(estimated_survival_B, survival_B, atol=1e-4)
+```
+
+We have found that the HR is usually assumed constant over time, and therefore can be represented by a single number.
+
+Although the HR does not change over time, the RR does change over time, as a result of the operation of the rate captured by the HR.
+
+HR is rather difficult to explain, but RR is not.   Luckily the rule above allows us to calculate survival for one group for any give time, given the survival for the other group at that time and the HR.  We can then calculate the corresponding RR.
+
+
+For example, consider the trial reported in Fisher *et al* 2002 (N Engl J Med, Vol. 347, p 1223).   They compared treatments for breast cancer, including Mastectomy (Mx) — total removal of the affected breast — and Breast Conserving Surgery (BCS) — only removing the tumor with some tissue around it for safety.
+
+They found an overall survival at 20 years of 0.47 (47%) in the Mastectomy (Mx)
+group, and overall survival of 0.46 for the BCS group.  They also report a HR
+of 1.05 for BCS relative to Mastectomy.
+
+We can calculate the RR directly from these numbers, but what if we did not
+have the overall survival for the BCS group, for some reason?  We could
+calculate it using the HR.
+
+```{python}
+survival_mx = 0.47
+mx_bcs_hr = 1.05
+est_survival_bcs = survival_mx ** mx_bcs_hr
+print("Estimated survival for BCS group using HR", est_survival_bcs)
+```
+
+This is a reasonable approximation to the actual value for BCS of 0.46.
+
+
+We can then calculate the estimated relative risk by using the risks, given by
+one minus the survival proportions:
+
+```{python}
+est_rr = (1 - est_survival_bcs) / (1 - survival_mx)
+print('Estimated RR for BCS relative to Mx', est_rr)
+```
