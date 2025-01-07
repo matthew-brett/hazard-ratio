@@ -44,7 +44,8 @@ t = np.arange(0, stop=10, step=dt)
 t[:10]
 ```
 
-Next we make a survival curve for treatment A.   The survival curve gives the proportion of people still alive at any particular time $t$.
+Next we make a survival curve for treatment A.   The survival curve gives the
+proportion of people still alive at any particular time $t$.
 
 ```{python}
 # Values for a simple curve of survival after treatment A.
@@ -128,10 +129,14 @@ The RR of death with A relative to B is:
 rr_5 = risk_A_5 / risk_B_5
 print('Relative risk at 5 years', rr_5)
 ```
-This tells us that those in treatment A have 0.82 (82%) of the risk of death suffered in B.  Put another way, A has an 18% relative reduction in death compared to B, at 5 years.
+
+This tells us that those in treatment A have 0.82 (82%) of the risk of death
+suffered in B.  Put another way, A has an 18% relative reduction in death
+compared to B, at 5 years.
 
 
-We can plot RR over time, by first calculating the *death* curves (which are just the survival curves subtracted from 1):
+We can plot RR over time, by first calculating the *death* curves (which are
+just the survival curves subtracted from 1):
 
 ```{python}
 death_A = 1 - survival_A
@@ -256,7 +261,7 @@ plt.legend();
 ```
 
 
-Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of the fact we used simple exponential functions to create the initial survival curves.  In general, and with more complicated survival curves, the hazard ratio can vary over time.
+Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of the fact we used simple exponential functions to create the initial survival curves.  In general, and with more complicated survival curves, the hazard rates can vary over time.
 
 
 The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for A divided by the hazard rate for B:
@@ -282,14 +287,22 @@ HR = np.mean(hazard_ratios)
 print('HR for A relative to B', HR)
 ```
 
-At this point we should say that it is an assumption of typical hazard ratio calculations that the *hazard rates* are proportional across time, meaning that the *hazard ratio* remains the same over time.  This is an assumption in most HR calculations from models - see [Proportional Hazards Model](https://en.wikipedia.org/wiki/Proportional_hazards_model).
+At this point we should say that it is an assumption of typical hazard ratio
+calculations that the *hazard rates* are proportional across time, meaning that
+the *hazard ratio* remains the same over time.  This is an assumption in most
+HR calculations from models — see Appendix 1.
 
 
-Notice too that the HR is approximately the same as the RR very near the start of our time-course, but - in this case - much further from zero than the RR at the end of the time-course.
+Notice too that the HR is approximately the same as the RR very near the start
+of our time-course, but - in this case - much further from zero than the RR at
+the end of the time-course.
 
-In fact, if the assumption of the proportional hazard rate holds, we can use the single value HR to calculate the survival curve of A from the survival curve of B.
+In fact, if the assumption of the proportional hazard rate holds, we can use
+the single value HR to calculate the survival curve of A from the survival
+curve of B (see appendix 2 below).
 
-This is because it is possible to show that the survival of A is given by:
+This is because it is possible (appendix 2) to show that the survival of A is
+given by:
 
 ```{python}
 estimated_survival_A = survival_B ** HR
@@ -305,18 +318,24 @@ estimated_survival_B = survival_A ** (1 / HR)
 np.allclose(estimated_survival_B, survival_B, atol=1e-4)
 ```
 
-We have found that the HR is usually assumed constant over time, and therefore can be represented by a single number.
+We have seen that, under the most common *proportional hazards* models, the HR is assumed constant over time, and therefore can be represented by a single number.
 
 Although the HR does not change over time, the RR does change over time, as a result of the operation of the rate captured by the HR.
 
 HR is rather difficult to explain, but RR is not.   Luckily the rule above allows us to calculate survival for one group for any give time, given the survival for the other group at that time and the HR.  We can then calculate the corresponding RR.
 
 
-For example, consider the trial reported in Fisher *et al* 2002 (N Engl J Med, Vol. 347, p 1223).   They compared treatments for breast cancer, including Mastectomy (Mx) — total removal of the affected breast — and Breast Conserving Surgery (BCS) — only removing the tumor with some tissue around it for safety.
+## Example — estimating RR from HR
+
+
+Consider the trial reported in Fisher *et al* 2002 (N Engl J Med, Vol. 347,
+p 1223).   They compared treatments for breast cancer, including Mastectomy
+(Mx) (total removal of the affected breast) — and Breast Conserving Surgery
+(BCS) (only removing the tumor with some tissue around it for safety).
 
 They found an overall survival at 20 years of 0.47 (47%) in the Mastectomy (Mx)
 group, and overall survival of 0.46 for the BCS group.  They also report a HR
-of 1.05 for BCS relative to Mastectomy.
+of 1.05 for BCS relative to Mastectomy for overall survival.
 
 We can calculate the RR directly from these numbers, but what if we did not
 have the overall survival for the BCS group, for some reason?  We could
@@ -339,3 +358,70 @@ one minus the survival proportions:
 est_rr = (1 - est_survival_bcs) / (1 - survival_mx)
 print('Estimated RR for BCS relative to Mx', est_rr)
 ```
+
+## Appendix 1: Technical note on proportional hazards
+
+For more technical detail, see [Wikipedia on the Proportional Hazards
+Model](https://en.wikipedia.org/wiki/Proportional_hazards_model).
+
+When using a proportional hazards model in comparing the two hazard rate curves
+for A and B, we would be comparing the curves at two different values of
+a *covariate* in the model. For this categorical covariate, expressing the
+difference between A and B, the covariate might have value 1 for treatment
+A and 0 for treatment B.  From the page above:
+
+> The proportional hazards condition states that covariates are
+multiplicatively related to the hazard.
+
+In our case, in the proportional hazards model, our assumption is that the
+hazard rate of A is given by the hazard rate of B times some constant $c$.
+
+
+## Appendix 2: Estimating survival from the hazard ratio
+
+You do not need the following mathematics to understand the argument in the
+page above.
+
+The mathematics here comes from the explanation for the calculation of survival
+from HR given at <https://realrisklight.wintoncentre.uk>, with thanks. We have
+edited it lightly to match this page.
+
+For context, in our case, the function $S_A$ is the survival function for
+treatment A, meaning, the function that accepts a time $t$ and returns
+a survival value.  It is the function that gives the values for the survival
+curve `survival_A` above. Thus $S_A(t)$ is the survival proportion
+(probability) at time $t$.  $S_B$ is the corresponding function giving the
+values for the B survival curve (`survival_B` above).  The functions $h_A$ and
+$h_B$ are the functions giving the values for the hazard rates of A and
+B respectively. We'll call A — the "active" group, and B — the "baseline"
+group.  Thus $h_A(t)$ is the hazard rate for treatment A (the "active"
+treatment) for a given time $t$.
+
+By definition, $\text{HR} = \frac{h_A(t)}{h_B(t)}$, where $h_A(t)$,$h_B(t)$ are the
+hazards in the "active" and "baseline" groups respectively at time $t$.
+
+Therefore $\text{HR}=\frac{H_A(t)}{H_B(t)}$, where $H_A(t)$, $H_B(t)$ are the
+cumulative hazards.
+
+(The previous step is so on the assumption of proportional hazards.  On that
+assumption, there is some scalar $\text{HR}$ such that $\text{HR}\ h_A(t)
+= h_B(t)$ as above.  Therefore when we integrate $h_A(t)$ to $H_A(t)$, and
+$h_B(t)$ to $H_B(t)$, it is also true that $\text{HR}\ H_A(t) = H_B(t)$)
+
+A standard result is that $H_A(t)=-\log S_A(t)$, $H_B(t)=-\log S_B(t)$, where
+$S_A(t)$,$S_B(t)$ are the survival probabilities up to time $t$.
+
+See these expositions for an explanation of the result above:
+
+* [Towards DataScience
+  article](https://towardsdatascience.com/the-mathematical-relationship-between-the-survival-function-and-hazard-function-74559bb6cc34).
+* [GraphPad
+   explanation](https://www.graphpad.com/guides/prism/latest/statistics/stat_cox_math_cumulative_hazard.htm)
+
+And so $\text{HR}=\frac{\log S_A(t)}{\log S_B(t)}$.
+
+Rearranging gives:
+
+$$
+S_A(t) = S_B(t)^{\text{HR}}
+$$
