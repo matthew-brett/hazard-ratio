@@ -338,7 +338,7 @@ of 1.05 for BCS relative to Mastectomy for overall survival.
 
 We can calculate the RR directly from these numbers, but what if we did not
 have the overall survival for the BCS group, for some reason?  We could
-calculate it using the HR.
+estimate it using the HR.
 
 ```{python}
 survival_mx = 0.47
