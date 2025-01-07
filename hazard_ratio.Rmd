@@ -403,9 +403,9 @@ Therefore $\text{HR}=\frac{H_A(t)}{H_B(t)}$, where $H_A(t)$, $H_B(t)$ are the
 cumulative hazards.
 
 (The previous step depends on the assumption of proportional hazards.  On that
-assumption, there is some scalar $\text{HR}$ such that $\text{HR}\ h_A(t)
-= h_B(t)$ as above.  Therefore when we integrate $h_A(t)$ to $H_A(t)$, and
-$h_B(t)$ to $H_B(t)$, it is also true that $\text{HR}\ H_A(t) = H_B(t)$.)
+assumption, there is some scalar $\text{HR}$ such that $h_A(t) = \text{HR}
+\ h_B(t)$ as above.  Therefore when we integrate $h_A(t)$ to $H_A(t)$, and
+$h_B(t)$ to $H_B(t)$, it is also true that $H_A(t) = \text{HR}\ H_B(t)$.)
 
 A standard result is that $H_A(t)=-\log S_A(t)$, $H_B(t)=-\log S_B(t)$, where
 $S_A(t)$,$S_B(t)$ are the survival probabilities up to time $t$.
