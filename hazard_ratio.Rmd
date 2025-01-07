@@ -242,7 +242,7 @@ because there are more people at risk of death in A, because more people have
 survived.  We therefore adjust the death rate (above) by dividing by the
 survival values, to give the death *hazard rate*.   This is the death rate,
 accounting for the proportion still at risk from death.  Therefore, for any
-particular time, this gives the risk of death for those still alive.
+particular time, this gives the rate of death for those still alive.
 
 ```{python}
 # For the reasons above - we drop the last survival value.
