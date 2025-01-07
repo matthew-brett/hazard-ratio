@@ -103,17 +103,17 @@ pos_5y
 ```
 
 ```{python}
-print('Time (years) at mid-position', t[pos_5y])
+print('Time (years) at mid-position:', t[pos_5y])
 ```
 
 ```{python}
 survival_A_5 = survival_A[pos_5y]  # Value for A at 5 years.
-print('A survival at 5 years', survival_A_5)
+print('A survival at 5 years:', survival_A_5)
 ```
 
 ```{python}
 survival_B_5 = survival_B[pos_5y]  # Value for B at 5 years.
-print('B survival at 5 years', survival_B_5)
+print('B survival at 5 years:', survival_B_5)
 ```
 
 The risk of death is the survival proportion (above) subtracted from 1:
@@ -127,7 +127,7 @@ The RR of death with A relative to B is:
 
 ```{python}
 rr_5 = risk_A_5 / risk_B_5
-print('Relative risk at 5 years', rr_5)
+print('Relative risk at 5 years:', rr_5)
 ```
 
 This tells us that those in treatment A have 0.82 (82%) of the risk of death
@@ -203,7 +203,7 @@ Here is the death *rate* for A at 5 years;
 
 ```{python}
 death_rate_A_5 = (death_A[pos_5y + 1] - death_A[pos_5y]) / dt
-print('Death rate for A at 5 years', death_rate_A_5)
+print('Death rate for A at 5 years:', death_rate_A_5)
 ```
 
 We can do also do this calculation with the `np.diff` function, that
@@ -214,7 +214,7 @@ previous element in the array.
 # Rate calculation for all values.
 death_rate_A = np.diff(death_A) / dt
 # Show that we get the same value for 5 years as we did above.
-print('Death rate for A at 5 years', death_rate_A[pos_5y])
+print('Death rate for A at 5 years:', death_rate_A[pos_5y])
 ```
 
 ```{python}
@@ -261,7 +261,7 @@ plt.legend();
 ```
 
 
-Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of the fact we used simple exponential functions to create the initial survival curves.  In general, and with more complicated survival curves, the hazard rates can vary over time.
+Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of our use of simple exponential functions to create the initial survival curves.  In general, with more complicated survival curves, the hazard rates can vary over time.
 
 
 The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for A divided by the hazard rate for B:
@@ -276,7 +276,6 @@ plt.xlabel('Time (years)')
 plt.ylabel('Hazard ratios')
 plt.title('Hazard ratio values for treatments A and B')
 plt.legend();
-hazard_ratios
 ```
 
 Because the hazard rates (in this case) were constant, then the hazard ratios are constant, and therefore, we only need one hazard ratio value to summarize the whole time-course:
@@ -284,7 +283,7 @@ Because the hazard rates (in this case) were constant, then the hazard ratios ar
 ```{python}
 # We take the mean, but we could have taken the first, or last ...
 HR = np.mean(hazard_ratios)
-print('HR for A relative to B', HR)
+print('HR for A relative to B:', HR)
 ```
 
 At this point we should say that it is an assumption of typical hazard ratio
@@ -345,7 +344,7 @@ calculate it using the HR.
 survival_mx = 0.47
 mx_bcs_hr = 1.05
 est_survival_bcs = survival_mx ** mx_bcs_hr
-print("Estimated survival for BCS group using HR", est_survival_bcs)
+print("Estimated survival for BCS group using HR:", est_survival_bcs)
 ```
 
 This is a reasonable approximation to the actual value for BCS of 0.46.
@@ -356,7 +355,7 @@ one minus the survival proportions:
 
 ```{python}
 est_rr = (1 - est_survival_bcs) / (1 - survival_mx)
-print('Estimated RR for BCS relative to Mx', est_rr)
+print('Estimated RR for BCS relative to Mx:', est_rr)
 ```
 
 ## Appendix 1: Technical note on proportional hazards
@@ -374,7 +373,7 @@ A and 0 for treatment B.  From the page above:
 multiplicatively related to the hazard.
 
 In our case, in the proportional hazards model, our assumption is that the
-hazard rate of A is given by the hazard rate of B times some constant $c$.
+hazard rate of A is given by the hazard rate of B times some constant $c$.  HR is our preferred name for that constant $c$.
 
 
 ## Appendix 2: Estimating survival from the hazard ratio
@@ -403,22 +402,28 @@ hazards in the "active" and "baseline" groups respectively at time $t$.
 Therefore $\text{HR}=\frac{H_A(t)}{H_B(t)}$, where $H_A(t)$, $H_B(t)$ are the
 cumulative hazards.
 
-(The previous step is so on the assumption of proportional hazards.  On that
+(The previous step depends on the assumption of proportional hazards.  On that
 assumption, there is some scalar $\text{HR}$ such that $\text{HR}\ h_A(t)
 = h_B(t)$ as above.  Therefore when we integrate $h_A(t)$ to $H_A(t)$, and
-$h_B(t)$ to $H_B(t)$, it is also true that $\text{HR}\ H_A(t) = H_B(t)$)
+$h_B(t)$ to $H_B(t)$, it is also true that $\text{HR}\ H_A(t) = H_B(t)$.)
 
 A standard result is that $H_A(t)=-\log S_A(t)$, $H_B(t)=-\log S_B(t)$, where
 $S_A(t)$,$S_B(t)$ are the survival probabilities up to time $t$.
 
-See these expositions for an explanation of the result above:
+See these links for explanations of the result above:
 
 * [Towards DataScience
   article](https://towardsdatascience.com/the-mathematical-relationship-between-the-survival-function-and-hazard-function-74559bb6cc34).
 * [GraphPad
-   explanation](https://www.graphpad.com/guides/prism/latest/statistics/stat_cox_math_cumulative_hazard.htm)
+   explanation](https://www.graphpad.com/guides/prism/latest/statistics/stat_cox_math_cumulative_hazard.htm).
+* [A nice Youtube walkthough](https://www.youtube.com/watch?v=zAdF8WSyfsA) by
+  [Zedstatistics](https://www.zstatistics.com).
 
-And so $\text{HR}=\frac{\log S_A(t)}{\log S_B(t)}$.
+Therefore:
+
+$$
+\text{HR}=\frac{\log S_A(t)}{\log S_B(t)}
+$$
 
 Rearranging gives:
 
