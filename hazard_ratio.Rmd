@@ -265,8 +265,8 @@ accounting for the proportion still at risk from death.  Therefore, for any
 particular time, this gives the rate of death for those still alive.
 
 
-Here's the death *hazard ratio* for 5 years.  It's the death rate (slope of the
-death curve) divided by the survival value for 5 years:
+Here's the death *hazard rate* (*not the ratio*) for 5 years.  It's the death
+rate (slope of the death curve) divided by the survival value for 5 years:
 
 ```{python}
 hazard_rate_A_5 = death_rate_A_5 / survival_a(5)
