@@ -34,7 +34,11 @@ Our example survival curves will be for two treatments, A and B, over a period
 of 10 years.
 
 
-First we make a survival function for treatment A.   The survival function gives us, for any time $t$, the proportion of people still alive at time $t$.  This survival function is an idealized mathematical calculation, but let's pretend the values from the function represent actual measured survival at any particular time $t$.
+First we make a survival function for treatment A.   The survival function
+gives us, for any time $t$, the proportion of people still alive at time $t$.
+This survival function is an idealized mathematical calculation, but let's
+pretend the values from the function represent actual measured survival at any
+particular time $t$.
 
 ```{python}
 def survival_a(t):
@@ -43,7 +47,8 @@ def survival_a(t):
     return np.exp(t) ** (-1 / 3)
 ```
 
-The detail of the actual equation in `survival_a` is not much relevant here - it's just a way to generate a typical-looking survival curve.
+The detail of the actual equation in `survival_a` is not much relevant here
+— it's just a way to generate a typical-looking survival curve.
 
 Now we can calculate the survival for a particular time - here - 5 years:
 
@@ -52,17 +57,20 @@ Now we can calculate the survival for a particular time - here - 5 years:
 survival_a(5)
 ```
 
-This tells us that around 19% of people survived 5 years or more on treatment A.
+This tells us that around 19% of people survived 5 years or more on treatment
+A.
 
 
-In fact, the way we've written the function, we can also send it a sequence of values for $t$, and it will calculate survival for all the values:
+In fact, the way we've written the function, we can also send it a sequence of
+values for $t$, and it will calculate survival for all the values:
 
 ```{python}
 # Survival at 0, 2.5 and 5 years.
 survival_a([0, 2.5, 5])
 ```
 
-Next we make an array to store *all* the times for which we imagine having measured survival, in our idealized example.
+Next we make an array to store *all* the times for which we imagine having
+measured survival, in our idealized example.
 
 ```{python}
 dt = 0.001  # The gap between measurements.
@@ -72,7 +80,8 @@ times = np.arange(0, stop=10, step=dt)
 times[:10]
 ```
 
-We plot survival for A, by asking for survival for all our example times in the `times` array above:
+We plot survival for A, by asking for survival for all our example times in the
+`times` array above:
 
 ```{python}
 plt.plot(times, survival_a(times), label='A')
@@ -82,7 +91,8 @@ plt.title('Survival curve for treatment A')
 plt.legend();
 ```
 
-Now let's make another idealized curve for treatment B, and plot it together with A.
+Now let's make another idealized curve for treatment B, and plot it together
+with A.
 
 ```{python}
 def survival_b(t):
@@ -134,9 +144,9 @@ rr_5 = risk_A_5 / risk_B_5
 print('Relative risk at 5 years:', rr_5)
 ```
 
-This tells us that those having treatment A have 0.82 (82%) of the risk of death
-suffered with treatment B.  Put another way, A has an 18% relative reduction in death
-compared to B, at 5 years.
+This tells us that those having treatment A have 0.82 (82%) of the risk of
+death suffered with treatment B.  Put another way, A has an 18% relative
+reduction in death compared to B, at 5 years.
 
 
 We can plot RR over time, by first calculating the *death* curves (which are
@@ -187,7 +197,8 @@ of 1 means that the relative risk of death is similar between A and B.
 The Hazard Ratio (HR) is another way to compare survival (or, equivalently,
 death) between two conditions.
 
-The HR is the ratio of two *hazard rates*.  In our case, we will be comparing the hazard rates for treatments A and B.
+The HR is the ratio of two *hazard rates*.  In our case, we will be comparing
+the hazard rates for treatments A and B.
 
 The hazard rate for death, is the rate of death at some particular time,
 divided by the proportion still alive at that time.
@@ -199,17 +210,18 @@ therefore death) curve, we could calculate that slope using calculus, and in
 particular, by taking the *derivative* of the death curve, but let's reduce the
 mathematics by doing this slope calculation *numerically*.  We take slope at
 any particular time to be the difference between the current death value and
-the death value after a short time interval, divided by the length of time interval
-([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis value divided
-by change in x-axis value, or *rise over run*).
+the death value after a short time interval, divided by the length of time
+interval ([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis
+value divided by change in x-axis value, or *rise over run*).
 
-Here is the death *rate* for A at 5 years, with a time interval of 0.001 years:
+Here is the death *rate* for A at 5 years, with a time interval of 0.0001
+years:
 
 ```{python}
 death_A_5 = 1 - survival_a(5)  # Death at 5 years.
-death_A_5p001 = 1 - survival_a(5.001)  # Death at 5.001 years.
-# Slope is change in y (above) divided by change in x (0.001).
-death_rate_A_5 = (death_A_5p001 - death_A_5) / 0.001
+death_A_5p0001 = 1 - survival_a(5.0001)  # Death at 5.0001 years.
+# Slope is change in y (above) divided by change in x (0.0001).
+death_rate_A_5 = (death_A_5p0001 - death_A_5) / 0.0001
 print('Death rate for A at 5 years:', death_rate_A_5)
 ```
 
@@ -218,10 +230,10 @@ Now we do this calculation for death rate for all our times array:
 ```{python}
 # Death rate for all our example times.
 death_A = 1 - survival_a(times)
-# Death rate for these times, each plus 0.001.
-death_Ap001 = 1 - survival_a(times + 0.001)
+# Death rate for these times, each plus 0.0001.
+death_Ap0001 = 1 - survival_a(times + 0.0001)
 # Rates (slopes) for all times.
-death_rate_A = (death_Ap001 - death_A) / 0.001
+death_rate_A = (death_Ap0001 - death_A) / 0.0001
 # Show the first 5 values of death_rate_A
 death_rate_A[:5]
 ```
@@ -230,8 +242,8 @@ We do the same for treatment B:
 
 ```{python}
 death_B = 1 - survival_b(times)
-death_Bp001 = 1 - survival_b(times + 0.001)
-death_rate_B = (death_Bp001 - death_B) / 0.001
+death_Bp0001 = 1 - survival_b(times + 0.0001)
+death_rate_B = (death_Bp0001 - death_B) / 0.0001
 # Show the first 5 values of death_rate_B
 death_rate_B[:5]
 ```
@@ -252,6 +264,17 @@ survival values, to give the death *hazard rate*.   This is the death rate,
 accounting for the proportion still at risk from death.  Therefore, for any
 particular time, this gives the rate of death for those still alive.
 
+
+Here's the death *hazard ratio* for 5 years.  It's the death rate (slope of the
+death curve) divided by the survival value for 5 years:
+
+```{python}
+hazard_rate_A_5 = death_rate_A_5 / survival_a(5)
+hazard_rate_A_5
+```
+
+We do this calculation for all times, for both treatments, and plot:
+
 ```{python}
 hazard_rate_A = death_rate_A / survival_a(times)
 hazard_rate_B = death_rate_B / survival_b(times)
@@ -268,10 +291,14 @@ plt.legend();
 ```
 
 
-In our example, the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of our use of simple exponential functions to create the initial survival curves.  In general, with more complicated survival curves, the hazard rates can vary over time.
+In our example, the hazard rates are the same at all times, for both
+treatments.  This is a mathematical artefact of our use of simple exponential
+functions to create the initial survival curves.  In general, with more
+complicated survival curves, the hazard rates can vary over time.
 
 
-The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for A divided by the hazard rate for B:
+The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for
+A divided by the hazard rate for B:
 
 ```{python}
 hazard_ratios = hazard_rate_A / hazard_rate_B
@@ -285,11 +312,16 @@ plt.title('Hazard ratio values for treatments A and B')
 plt.legend();
 ```
 
-Because the hazard rates (in this case) were constant, then the hazard ratios are constant, and therefore, we only need one hazard ratio value to summarize the whole time-course:
+Because the hazard rates (in this case) were constant, then the hazard ratios
+are constant, and therefore, we only need one hazard ratio value to summarize
+the whole time-course:
 
 ```{python}
-# We take the mean, but we could have taken the first, or last ...
-HR = np.mean(hazard_ratios)
+# We take any of these values, because they are all very close
+# (and in fact, the differences are just due to tiny imprecisions
+# in the calculation).
+# Let's just take the first.
+HR = hazard_ratios[0]
 print('HR for A relative to B:', HR)
 ```
 
@@ -303,12 +335,15 @@ Notice too that the HR is approximately the same as the RR very near the start
 of our time-course, but - in this case - much further from zero than the RR at
 the end of the time-course.
 
-In fact, if the assumption of the proportional hazard rate holds, we can use
+## Estimating survival from the hazard rate
+
+
+If the assumption of the proportional hazard rate holds, we can use
 the single value HR to calculate the survival curve of A from the survival
 curve of B (see appendix 2 below).
 
 This is because it is possible (appendix 2) to show that the survival of A is
-given by:
+estimated by:
 
 ```{python}
 estimated_survival_A = survival_b(times) ** HR
@@ -316,7 +351,8 @@ estimated_survival_A = survival_b(times) ** HR
 np.allclose(estimated_survival_A, survival_a(times), atol=0.0001)
 ```
 
-The HR is a *ratio*; it is the hazard rate for A divided by that for B.  Therefore the HR for B relative to A is given by `1 / HR` and:
+The HR is a *ratio*; it is the hazard rate for A divided by that for B.
+Therefore the HR for B relative to A is given by `1 / HR` and:
 
 ```{python}
 estimated_survival_B = survival_a(times) ** (1 / HR)
@@ -324,11 +360,20 @@ estimated_survival_B = survival_a(times) ** (1 / HR)
 np.allclose(estimated_survival_B, survival_b(times), atol=0.0001)
 ```
 
-We have seen that, under the most common *proportional hazards* models, the HR is assumed constant over time, and therefore can be represented by a single number.
+## Interim summary
 
-Although the HR does not change over time, the RR does change over time, as a result of the operation of the rate captured by the HR.
 
-HR is rather difficult to explain, but RR is not.   Luckily the rule above allows us to calculate survival for one group for any give time, given the survival for the other group at that time and the HR.  We can then calculate the corresponding RR.
+We have seen that, under the most common *proportional hazards* models, the HR
+is assumed constant over time, and therefore can be represented by a single
+number.
+
+Although the HR does not change over time, the RR does change over time, as
+a result of the operation of the rate captured by the HR.
+
+HR is rather difficult to explain, but RR is not.   Luckily the rule above
+allows us to calculate survival for one group for any give time, given the
+survival for the other group at that time and the HR.  We can then calculate
+the corresponding RR.
 
 
 ## Example — estimating RR from HR
@@ -380,7 +425,8 @@ A and 0 for treatment B.  From the page above:
 multiplicatively related to the hazard.
 
 In our case, in the proportional hazards model, our assumption is that the
-hazard rate of A is given by the hazard rate of B times some constant $c$.  HR is our preferred name for that constant $c$.
+hazard rate of A is given by the hazard rate of B times some constant $c$.  HR
+is our preferred name for that constant $c$.
 
 
 ## Appendix 2: Estimating survival from the hazard ratio
@@ -394,7 +440,8 @@ edited it lightly to match this page.
 
 For context, in our case, the function $S_A$ is the survival function for
 treatment A, meaning, the function that accepts a time $t$ and returns
-a survival value.  In our example above, $S_A$ is the mathematical notation for our Python function `survival_a`. Thus $S_A(t)$ is the survival proportion
+a survival value.  In our example above, $S_A$ is the mathematical notation for
+our Python function `survival_a`. Thus $S_A(t)$ is the survival proportion
 (probability) at time $t$.  $S_B$ is the corresponding function giving the
 values for the B survival curve (`survival_b` above).  The functions $h_A$ and
 $h_B$ are the functions giving the values for the hazard rates of A and
@@ -402,8 +449,80 @@ B respectively. We'll call A — the "active" group, and B — the "baseline"
 group.  Thus $h_A(t)$ is the hazard rate for treatment A (the "active"
 treatment) for a given time $t$.
 
-By definition, $\text{HR} = \frac{h_A(t)}{h_B(t)}$, where $h_A(t)$,$h_B(t)$ are the
-hazards in the "active" and "baseline" groups respectively at time $t$.
+
+By definition, $\text{HR} = \frac{h_A(t)}{h_B(t)}$, where $h_A(t)$,$h_B(t)$ are
+the hazards in the "active" and "baseline" groups respectively at time $t$.
+
+We haven't defined these functions in Python above, we've just calculated
+values for the functions, but we could define the hazard functions from the
+survival functions, like this:
+
+```{python}
+def generic_hazard_rate(t, survival_func, dt=0.0001):
+    """ Hazard rate at time(s) t, given a particular survival function.
+
+    The survival function is a Python function we can call, that will give us
+    survival value(s) at any given time(s).
+
+    Parameters
+    ----------
+    t : float or sequence of float.
+        Time value(s) at which to evaluate hazard rate.
+    survival_func : function
+        Function accepting time(s) such as those in `t` and returning
+        corresponding survival values.
+    dt : float, optional
+        Small time interval over which to estimate slope when estimating death
+        rate. Default is 0.0001.
+
+    Returns
+    -------
+    haz_rate : array
+        Hazard rates at time(s) `t`.
+    """
+    # Survival and death at time(s) t.
+    survival = survival_func(t)
+    death = 1 - survival
+    # Survival and death some short time after time(s) t.
+    later_t = t + dt
+    survival_later = survival_func(later_t)
+    death_later = 1 - survival_later
+    # Slope(s) of death curve at time(s) t.
+    death_rate = (death_later - death) / dt
+    # Hazard rate.
+    return death_rate / survival
+
+
+def h_A(t):
+    """ Hazard rate function for treatment A
+
+    Uses generic hazard rate function with specific survival function
+    ``survival_a``.
+    """
+    return generic_hazard_rate(t, survival_a, 0.0001)
+
+
+def h_B(t):
+    """ Hazard rate function for treatment B
+
+    Uses generic hazard rate function with specific survival function
+    ``survival_b``.
+    """
+    return generic_hazard_rate(t, survival_b, 0.0001)
+
+
+# Hazard ratio at 5 years.
+HR = h_A(5) / h_B(5)
+print('Hazard ratio at 5 years:', HR)
+```
+
+For our simple example, the proportional hazards assumption holds, as we have seen.
+
+```{python}
+# Same (within calculation error) for 10 years.
+h_A(10) / h_B(10)
+print('Hazard ratio at 10 years:', HR)
+```
 
 Therefore $\text{HR}=\frac{H_A(t)}{H_B(t)}$, where $H_A(t)$, $H_B(t)$ are the
 cumulative hazards.
@@ -412,6 +531,29 @@ cumulative hazards.
 assumption, there is some scalar $\text{HR}$ such that $h_A(t) = \text{HR}
 \ h_B(t)$ as above.  Therefore when we integrate $h_A(t)$ to $H_A(t)$, and
 $h_B(t)$ to $H_B(t)$, it is also true that $H_A(t) = \text{HR}\ H_B(t)$.)
+
+
+```{python}
+def H_A(t):
+    """Cumulative hazard rate function for A
+    """
+    return np.cumsum(h_A(t))
+
+
+def H_B(t):
+    """Cumulative hazard rate function for B
+    """
+    return np.cumsum(h_B(t))
+
+
+HR = H_A(5) / H_B(5)
+print('Hazard ratio from cumulative hazards at 5 years:', HR)
+```
+
+```{python}
+# Same (within calculation error) for 10 years.
+print('Hazard ratio from cumulative hazards at 5 years:', H_A(10) / H_B(10))
+```
 
 A standard result is that $H_A(t)=-\log S_A(t)$, $H_B(t)=-\log S_B(t)$, where
 $S_A(t)$,$S_B(t)$ are the survival probabilities up to time $t$.
@@ -431,8 +573,24 @@ $$
 \text{HR}=\frac{\log S_A(t)}{\log S_B(t)}
 $$
 
+```{python}
+# Numerically, for our example.
+HR = np.log(survival_a(5)) / np.log(survival_b(5))
+print('Hazard ratio from -log survival at 5 years:', HR)
+```
+
 Rearranging gives:
 
 $$
 S_A(t) = S_B(t)^{\text{HR}}
 $$
+
+```{python}
+# Numerical check, for 5 years, for our example.
+np.isclose(survival_a(5), survival_b(5) ** HR)
+```
+
+```{python}
+# And for 10 years.
+np.isclose(survival_a(10), survival_b(10) ** HR)
+```
