@@ -33,31 +33,49 @@ import matplotlib.pyplot as plt  # Plotting
 Our example survival curves will be for two treatments, A and B, over a period
 of 10 years.
 
-We start by making an array to store the times at which we have measured
-survival, in our idealized example.
+
+First we make a survival function for treatment A.   The survival function gives us, for any time $t$, the proportion of people still alive at time $t$.  This survival function is an idealized mathematical calculation, but let's pretend the values from the function represent actual measured survival at any particular time $t$.
+
+```{python}
+def survival_a(t):
+    """ Calculate survival after treatment A, at time(s) t.
+    """
+    return np.exp(t) ** (-1 / 3)
+```
+
+The detail of the actual equation in `survival_a` is not much relevant here - it's just a way to generate a typical-looking survival curve.
+
+Now we can calculate the survival for a particular time - here - 5 years:
+
+```{python}
+# Survival on treatment A after 5 years
+survival_a(5)
+```
+
+This tells us that around 19% of people survived 5 years or more on treatment A.
+
+
+In fact, the way we've written the function, we can also send it a sequence of values for $t$, and it will calculate survival for all the values:
+
+```{python}
+# Survival at 0, 2.5 and 5 years.
+survival_a([0, 2.5, 5])
+```
+
+Next we make an array to store *all* the times for which we imagine having measured survival, in our idealized example.
 
 ```{python}
 dt = 0.001  # The gap between measurements.
 # Times at which we imagine our measurements to have taken place (in years).
-t = np.arange(0, stop=10, step=dt)
+times = np.arange(0, stop=10, step=dt)
 # Show the first 10 times.
-t[:10]
+times[:10]
 ```
 
-Next we make a survival curve for treatment A.   The survival curve gives the
-proportion of people still alive at any particular time $t$.
+We plot survival for A, by asking for survival for all our example times in the `times` array above:
 
 ```{python}
-# Values for a simple curve of survival after treatment A.
-# The maths of the equation is not much relevant here - it's just a way to
-# generate a typical-looking survival curve.
-survival_A = np.e ** -(t / 3)
-```
-
-We plot survival for A:
-
-```{python}
-plt.plot(t, survival_A, label='A')
+plt.plot(times, survival_a(times), label='A')
 plt.xlabel('Time (years)')
 plt.ylabel('Proportion still alive')
 plt.title('Survival curve for treatment A')
@@ -67,13 +85,15 @@ plt.legend();
 Now let's make another idealized curve for treatment B, and plot it together with A.
 
 ```{python}
-# Values for a simple curve of survival after treatment B.
-survival_B = np.e ** -(t / 1.25)
+def survival_b(t):
+    """ Calculate survival after treatment B, at time(s) t.
+    """
+    return np.exp(t) ** (-1 / 1.25)
 ```
 
 ```{python}
-plt.plot(t, survival_A, label='A')
-plt.plot(t, survival_B, linestyle=':', label='B')
+plt.plot(times, survival_a(times), label='A')
+plt.plot(times, survival_b(times), linestyle=':', label='B')
 plt.xlabel('Time (years)')
 plt.ylabel('Proportion still alive')
 plt.title('Survival curves for treatments A and B')
@@ -91,28 +111,12 @@ RR for that time is $r / p$.
 For example, consider the survival values for A and B at 5 years.
 
 ```{python}
-# Number of times (and survival values)
-N = len(t)
-N
-```
-
-```{python}
-# Value for 5 years is at the center of the array of values.
-pos_5y = round(N / 2)
-pos_5y
-```
-
-```{python}
-print('Time (years) at mid-position:', t[pos_5y])
-```
-
-```{python}
-survival_A_5 = survival_A[pos_5y]  # Value for A at 5 years.
+survival_A_5 = survival_a(5)
 print('A survival at 5 years:', survival_A_5)
 ```
 
 ```{python}
-survival_B_5 = survival_B[pos_5y]  # Value for B at 5 years.
+survival_B_5 = survival_b(5)
 print('B survival at 5 years:', survival_B_5)
 ```
 
@@ -130,8 +134,8 @@ rr_5 = risk_A_5 / risk_B_5
 print('Relative risk at 5 years:', rr_5)
 ```
 
-This tells us that those in treatment A have 0.82 (82%) of the risk of death
-suffered in B.  Put another way, A has an 18% relative reduction in death
+This tells us that those having treatment A have 0.82 (82%) of the risk of death
+suffered with treatment B.  Put another way, A has an 18% relative reduction in death
 compared to B, at 5 years.
 
 
@@ -139,13 +143,13 @@ We can plot RR over time, by first calculating the *death* curves (which are
 just the survival curves subtracted from 1):
 
 ```{python}
-death_A = 1 - survival_A
-death_B = 1 - survival_B
+death_A = 1 - survival_a(times)
+death_B = 1 - survival_b(times)
 ```
 
 ```{python}
-plt.plot(t, death_A, label='Death for A')
-plt.plot(t, death_B, linestyle=':', label='Death for B')
+plt.plot(times, death_A, label='Death for A')
+plt.plot(times, death_B, linestyle=':', label='Death for B')
 plt.xlabel('Time (years)')
 plt.ylabel('Proportion who have died')
 plt.title('Death curves for treatments A and B')
@@ -164,7 +168,7 @@ rr_A_rel_B = death_A / death_B
 ```
 
 ```{python}
-plt.plot(t, rr_A_rel_B, label='RR for A relative to B')
+plt.plot(times, rr_A_rel_B, label='RR for A relative to B')
 plt.xlabel('Time (years)')
 plt.ylabel('RR')
 plt.title('RR for treatment A relative to B')
@@ -195,42 +199,46 @@ therefore death) curve, we could calculate that slope using calculus, and in
 particular, by taking the *derivative* of the death curve, but let's reduce the
 mathematics by doing this slope calculation *numerically*.  We take slope at
 any particular time to be the difference between the current death value and
-the next, divided by the difference in time
+the death value after a short time interval, divided by the length of time interval
 ([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis value divided
 by change in x-axis value, or *rise over run*).
 
-Here is the death *rate* for A at 5 years;
+Here is the death *rate* for A at 5 years, with a time interval of 0.001 years:
 
 ```{python}
-death_rate_A_5 = (death_A[pos_5y + 1] - death_A[pos_5y]) / dt
+death_A_5 = 1 - survival_a(5)  # Death at 5 years.
+death_A_5p001 = 1 - survival_a(5.001)  # Death at 5.001 years.
+# Slope is change in y (above) divided by change in x (0.001).
+death_rate_A_5 = (death_A_5p001 - death_A_5) / 0.001
 print('Death rate for A at 5 years:', death_rate_A_5)
 ```
 
-We can do also do this calculation with the `np.diff` function, that
-calculates, for each element, the difference between the element and the
-previous element in the array.
+Now we do this calculation for death rate for all our times array:
 
 ```{python}
-# Rate calculation for all values.
-death_rate_A = np.diff(death_A) / dt
-# Show that we get the same value for 5 years as we did above.
-print('Death rate for A at 5 years:', death_rate_A[pos_5y])
+# Death rate for all our example times.
+death_A = 1 - survival_a(times)
+# Death rate for these times, each plus 0.001.
+death_Ap001 = 1 - survival_a(times + 0.001)
+# Rates (slopes) for all times.
+death_rate_A = (death_Ap001 - death_A) / 0.001
+# Show the first 5 values of death_rate_A
+death_rate_A[:5]
+```
+
+We do the same for treatment B:
+
+```{python}
+death_B = 1 - survival_b(times)
+death_Bp001 = 1 - survival_b(times + 0.001)
+death_rate_B = (death_Bp001 - death_B) / 0.001
+# Show the first 5 values of death_rate_B
+death_rate_B[:5]
 ```
 
 ```{python}
-# Death rate calculation for every time point of B.
-death_rate_B = np.diff(death_B) / dt
-# Show the first 10 values
-death_rate_B[:10]
-```
-
-```{python}
-# For plotting, we have take into account that we have one less
-# value in the rates than we do in the initial values, because we
-# have taken the differences.
-rate_t = t[:-1]  # Drop the last value for time.
-plt.plot(rate_t, death_rate_A, label='Rate of death for A')
-plt.plot(rate_t, death_rate_B, linestyle=':', label='Rate of death for B')
+plt.plot(times, death_rate_A, label='Rate of death for A')
+plt.plot(times, death_rate_B, linestyle=':', label='Rate of death for B')
 plt.xlabel('Time (years)')
 plt.ylabel('Death rate (change in death per unit time)')
 plt.title('Death rate curves for treatments A and B')
@@ -245,14 +253,13 @@ accounting for the proportion still at risk from death.  Therefore, for any
 particular time, this gives the rate of death for those still alive.
 
 ```{python}
-# For the reasons above - we drop the last survival value.
-hazard_rate_A = death_rate_A / survival_A[:-1]
-hazard_rate_B = death_rate_B / survival_B[:-1]
+hazard_rate_A = death_rate_A / survival_a(times)
+hazard_rate_B = death_rate_B / survival_b(times)
 ```
 
 ```{python}
-plt.plot(rate_t, hazard_rate_A, label='Hazard rate, death for A')
-plt.plot(rate_t, hazard_rate_B, linestyle=':',
+plt.plot(times, hazard_rate_A, label='Hazard rate, death for A')
+plt.plot(times, hazard_rate_B, linestyle=':',
          label='Hazard rate, death for B')
 plt.xlabel('Time (years)')
 plt.ylabel('Hazard rate (hazard for death per unit time)')
@@ -261,7 +268,7 @@ plt.legend();
 ```
 
 
-Notice that the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of our use of simple exponential functions to create the initial survival curves.  In general, with more complicated survival curves, the hazard rates can vary over time.
+In our example, the hazard rates are the same at all times, for both treatments.  This is a mathematical artefact of our use of simple exponential functions to create the initial survival curves.  In general, with more complicated survival curves, the hazard rates can vary over time.
 
 
 The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for A divided by the hazard rate for B:
@@ -271,7 +278,7 @@ hazard_ratios = hazard_rate_A / hazard_rate_B
 # Round these to the 8 decimal places to avoid calculation error,
 # and a noisy but uniformative plot.
 rounded_hrs = np.round(hazard_ratios, 8)
-plt.plot(rate_t, rounded_hrs, label='Hazard ratios, death for A')
+plt.plot(times, rounded_hrs, label='Hazard ratios, death for A')
 plt.xlabel('Time (years)')
 plt.ylabel('Hazard ratios')
 plt.title('Hazard ratio values for treatments A and B')
@@ -304,17 +311,17 @@ This is because it is possible (appendix 2) to show that the survival of A is
 given by:
 
 ```{python}
-estimated_survival_A = survival_B ** HR
+estimated_survival_A = survival_b(times) ** HR
 # This gives an accurate estimate of survival_A to 4 decimal places.
-np.allclose(estimated_survival_A, survival_A, atol=1e-4)
+np.allclose(estimated_survival_A, survival_a(times), atol=0.0001)
 ```
 
 The HR is a *ratio*; it is the hazard rate for A divided by that for B.  Therefore the HR for B relative to A is given by `1 / HR` and:
 
 ```{python}
-estimated_survival_B = survival_A ** (1 / HR)
+estimated_survival_B = survival_a(times) ** (1 / HR)
 # This gives an accurate estimate of survival_B to 4 decimal places.
-np.allclose(estimated_survival_B, survival_B, atol=1e-4)
+np.allclose(estimated_survival_B, survival_b(times), atol=0.0001)
 ```
 
 We have seen that, under the most common *proportional hazards* models, the HR is assumed constant over time, and therefore can be represented by a single number.
@@ -387,10 +394,9 @@ edited it lightly to match this page.
 
 For context, in our case, the function $S_A$ is the survival function for
 treatment A, meaning, the function that accepts a time $t$ and returns
-a survival value.  It is the function that gives the values for the survival
-curve `survival_A` above. Thus $S_A(t)$ is the survival proportion
+a survival value.  In our example above, $S_A$ is the mathematical notation for our Python function `survival_a`. Thus $S_A(t)$ is the survival proportion
 (probability) at time $t$.  $S_B$ is the corresponding function giving the
-values for the B survival curve (`survival_B` above).  The functions $h_A$ and
+values for the B survival curve (`survival_b` above).  The functions $h_A$ and
 $h_B$ are the functions giving the values for the hazard rates of A and
 B respectively. We'll call A — the "active" group, and B — the "baseline"
 group.  Thus $h_A(t)$ is the hazard rate for treatment A (the "active"
