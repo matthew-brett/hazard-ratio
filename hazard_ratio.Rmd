@@ -331,6 +331,9 @@ the *hazard ratio* remains the same over time.  This is an assumption in most
 HR calculations from models — see Appendix 1.
 
 
+The *proportional hazards* assumption does not mean that we assume that the *hazard rates* are constant over time (as they are here); it means that the *hazard ratios* are constant over time.  In general, the hazard rate could vary over time, but the *hazard ratio* could still be constant - and the proportional hazards assumption assumes only that there is a constant hazard ratio.
+
+
 Notice too that the HR is approximately the same as the RR very near the start
 of our time-course, but - in this case - much further from zero than the RR at
 the end of the time-course.
@@ -385,7 +388,7 @@ p 1223).   They compared treatments for breast cancer, including Mastectomy
 (BCS) (only removing the tumor with some tissue around it for safety).
 
 They found an overall survival at 20 years of 0.47 (47%) in the Mastectomy (Mx)
-group, and overall survival of 0.46 for the BCS group.  They also report a HR
+group, and overall survival of 0.46 for the BCS group.  They also report an HR
 of 1.05 for BCS relative to Mastectomy for overall survival.
 
 We can calculate the RR directly from these numbers, but what if we did not
@@ -552,7 +555,7 @@ print('Hazard ratio from cumulative hazards at 5 years:', HR)
 
 ```{python}
 # Same (within calculation error) for 10 years.
-print('Hazard ratio from cumulative hazards at 5 years:', H_A(10) / H_B(10))
+print('Hazard ratio from cumulative hazards at 10 years:', H_A(10) / H_B(10))
 ```
 
 A standard result is that $H_A(t)=-\log S_A(t)$, $H_B(t)=-\log S_B(t)$, where
