@@ -273,6 +273,10 @@ hazard_rate_A_5 = death_rate_A_5 / survival_a(5)
 hazard_rate_A_5
 ```
 
+This value tells us that, at 5 years, about 33% of the survivors are dying per
+year.
+
+
 We do this calculation for all times, for both treatments, and plot:
 
 ```{python}
@@ -292,9 +296,14 @@ plt.legend();
 
 
 In our example, the hazard rates are the same at all times, for both
-treatments.  This is a mathematical artefact of our use of simple exponential
-functions to create the initial survival curves.  In general, with more
-complicated survival curves, the hazard rates can vary over time.
+treatments.   For treatment A, about 33% of survivors are dying each year,
+every year; for treatment B, 80% of survivors are dying each year, every year.
+
+
+The constant hazard rate across time is a mathematical artefact of our use of
+simple exponential functions to create the initial survival curves.  In
+general, with more complicated survival curves, the hazard rates can vary over
+time.
 
 
 The *hazard ratio (HR)* for (here) A relative to B is the *hazard rate* for
@@ -303,7 +312,7 @@ A divided by the hazard rate for B:
 ```{python}
 hazard_ratios = hazard_rate_A / hazard_rate_B
 # Round these to the 8 decimal places to avoid calculation error,
-# and a noisy but uniformative plot.
+# and a noisy but uninformative plot.
 rounded_hrs = np.round(hazard_ratios, 8)
 plt.plot(times, rounded_hrs, label='Hazard ratios, death for A')
 plt.xlabel('Time (years)')
@@ -325,13 +334,30 @@ HR = hazard_ratios[0]
 print('HR for A relative to B:', HR)
 ```
 
+In words, we could say that the proportion of survivors dying each year for
+treatment A is about 42% that of the same proportion for treatment B.
+
+Put another way, the proportion of survivors dying each year for A is ...
+
+```{python}
+(1 - HR) * 100
+```
+
+... 58% lower than the proportion of survivors dying each year in treatment B.
+
+
 At this point we should say that it is an assumption of typical hazard ratio
-calculations that the *hazard rates* are proportional across time, meaning that
-the *hazard ratio* remains the same over time.  This is an assumption in most
-HR calculations from models — see Appendix 1.
+calculations that the *hazard rates* are *proportional* across time, meaning
+that the *hazard ratio* (HR) remains the same over time.  This is an assumption
+in most HR calculations from models — see Appendix 1.
 
 
-The *proportional hazards* assumption does not mean that we assume that the *hazard rates* are constant over time (as they are here); it means that the *hazard ratios* are constant over time.  In general, the hazard rate could vary over time, but the *hazard ratio* could still be constant - and the proportional hazards assumption assumes only that there is a constant hazard ratio.
+The *proportional hazards* assumption does not mean that we assume that the
+*hazard rates* are constant over time (as they are here); it means that the
+*hazard ratios* are constant over time.  In general, the hazard rate could vary
+over time, but the *hazard ratio* could still be constant - and the
+proportional hazards assumption assumes only that there is a constant hazard
+ratio.
 
 
 Notice too that the HR is approximately the same as the RR very near the start
@@ -519,7 +545,8 @@ HR = h_A(5) / h_B(5)
 print('Hazard ratio at 5 years:', HR)
 ```
 
-For our simple example, the proportional hazards assumption holds, as we have seen.
+For our simple example, the proportional hazards assumption holds, as we have
+seen.
 
 ```{python}
 # Same (within calculation error) for 10 years.
