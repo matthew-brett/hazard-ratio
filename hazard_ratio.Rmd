@@ -98,7 +98,7 @@ with A.
 def survival_b(t):
     """ Calculate survival after treatment B, at time(s) t.
     """
-    return np.exp(t) ** (-1 / 1.25)
+    return np.exp(t) ** (-0.8)
 ```
 
 ```{python}
@@ -207,11 +207,11 @@ The rate of death at a particular time is the slope of the death function.
 
 Because we've used a mathematical function to generate the survival (and
 therefore death) curve, we could calculate that slope using calculus, and in
-particular, by taking the *derivative* of the death curve, but let's reduce the
-mathematics by doing this slope calculation *numerically*.  We take slope at
-any particular time to be the difference between the current death value and
-the death value after a short time interval, divided by the length of time
-interval ([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis
+particular, by taking the *derivative* of the death curve function, but let's
+reduce the mathematics by doing this slope calculation *numerically*.  We take
+slope at any particular time to be the difference between the current death
+value and the death value after a short time interval, divided by the length of
+time interval ([slope](https://en.wikipedia.org/wiki/Slope) is change in y-axis
 value divided by change in x-axis value, or *rise over run*).
 
 Here is the death *rate* for A at 5 years, with a time interval of 0.0001
