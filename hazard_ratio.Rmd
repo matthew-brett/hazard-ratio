@@ -225,6 +225,10 @@ death_rate_A_5 = (death_A_5p0001 - death_A_5) / 0.0001
 print('Death rate for A at 5 years:', death_rate_A_5)
 ```
 
+In words, this means that, at 5 years, deaths were running at a rate of about
+6% of the entire group that started treatment A, per year.
+
+
 Now we do this calculation for death rate for all our times array:
 
 ```{python}
