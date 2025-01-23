@@ -609,6 +609,7 @@ $$
 
 ```{python}
 # Numerically, for our example.
+# (The same as previous answers within the precision of calculation).
 HR = np.log(survival_a(5)) / np.log(survival_b(5))
 print('Hazard ratio from log survival at 5 years:', HR)
 ```
