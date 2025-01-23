@@ -553,7 +553,7 @@ For our simple example, the proportional hazards assumption holds, as we have
 seen.
 
 ```{python}
-# Same (within calculation error) for 10 years.
+# Same for 10 years.
 h_A(10) / h_B(10)
 print('Hazard ratio at 10 years:', HR)
 ```
@@ -585,7 +585,7 @@ print('Hazard ratio from cumulative hazards at 5 years:', HR)
 ```
 
 ```{python}
-# Same (within calculation error) for 10 years.
+# Same for 10 years.
 print('Hazard ratio from cumulative hazards at 10 years:', H_A(10) / H_B(10))
 ```
 
@@ -610,7 +610,7 @@ $$
 ```{python}
 # Numerically, for our example.
 HR = np.log(survival_a(5)) / np.log(survival_b(5))
-print('Hazard ratio from -log survival at 5 years:', HR)
+print('Hazard ratio from log survival at 5 years:', HR)
 ```
 
 Rearranging gives:
